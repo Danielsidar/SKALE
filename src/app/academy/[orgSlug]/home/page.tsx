@@ -65,11 +65,11 @@ export default async function StudentDashboardPage({ params }: { params: { orgSl
       .eq('organization_id', organization.id)
       .eq('status', 'published')
     
-    myCourses = (allCourses || []).map(c => {
+    myCourses = (allCourses || []).map((c: any) => {
       const sortedModules = (c.modules || []).sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0))
-      const allLessons = sortedModules.flatMap(m => m.lessons || [])
+      const allLessons = sortedModules.flatMap((m: any) => m.lessons || [])
       const totalLessons = allLessons.length
-      const completedCount = allLessons.filter(l => completedLessonIds.has(l.id)).length
+      const completedCount = allLessons.filter((l: any) => completedLessonIds.has(l.id)).length
       const progressPercentage = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0
 
       const firstModule = sortedModules[0]
@@ -93,12 +93,12 @@ export default async function StudentDashboardPage({ params }: { params: { orgSl
       .select('*, courses(*, modules(id, order_index, lessons(id, order_index)))')
       .eq('profile_id', user.id)
 
-    myCourses = (enrollments || []).map(e => {
+    myCourses = (enrollments || []).map((e: any) => {
       const c = e.courses
       const sortedModules = (c.modules || []).sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0))
-      const allLessons = sortedModules.flatMap(m => m.lessons || [])
+      const allLessons = sortedModules.flatMap((m: any) => m.lessons || [])
       const totalLessons = allLessons.length
-      const completedCount = allLessons.filter(l => completedLessonIds.has(l.id)).length
+      const completedCount = allLessons.filter((l: any) => completedLessonIds.has(l.id)).length
       const progressPercentage = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0
 
       const firstModule = sortedModules[0]
