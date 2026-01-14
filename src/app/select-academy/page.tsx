@@ -9,6 +9,9 @@ import { Badge } from "@/components/ui/badge"
 import { signOut, setActiveOrganization } from "@/app/actions/auth"
 import Image from "next/image"
 
+// Prevent static generation - requires cookies/auth
+export const dynamic = 'force-dynamic'
+
 export default async function SelectAcademyPage() {
   const supabase = createClient(cookies())
   const { data: { user } } = await supabase.auth.getUser()

@@ -34,6 +34,9 @@ import { AcademyHeader } from "@/components/academy/academy-header"
 import { getAcademyMessages } from "@/app/actions/messages"
 import { getNotifications } from "@/app/actions/notifications"
 
+// Prevent static generation - requires cookies/auth
+export const dynamic = 'force-dynamic'
+
 export default async function AcademyLayout({
   children,
   params,

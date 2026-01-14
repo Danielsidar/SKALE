@@ -8,6 +8,9 @@ import { LandingPricing } from "@/components/landing/landing-pricing";
 import { LandingFaq } from "@/components/landing/landing-faq";
 import { LandingFooter } from "@/components/landing/landing-footer";
 
+// Prevent static generation - requires cookies/auth check
+export const dynamic = 'force-dynamic'
+
 export default async function Home() {
   const supabase = createClient(cookies());
   const { data: { session } } = await supabase.auth.getSession();

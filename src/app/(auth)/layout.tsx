@@ -2,6 +2,9 @@ import React from "react"
 import Link from "next/link"
 import { BookOpen } from "lucide-react"
 
+// Prevent static generation - env vars not available at build time
+export const dynamic = 'force-dynamic'
+
 export default function AuthLayout({
   children,
 }: {

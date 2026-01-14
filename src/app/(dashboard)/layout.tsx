@@ -8,6 +8,9 @@ import { createClient } from "@/lib/supabase/server"
 import { cookies } from "next/headers"
 import { getActiveProfile } from "@/lib/auth-utils"
 
+// Prevent static generation - requires cookies/auth
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardLayout({
   children,
 }: {

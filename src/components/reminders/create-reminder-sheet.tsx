@@ -51,6 +51,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { createReminder } from "@/actions/reminders"
+import { VariableInput } from "./variable-input"
 import { cn } from "@/lib/utils"
 
 const reminderSchema = z.object({
@@ -75,14 +76,6 @@ const steps = [
   { id: 2, title: "בחירת טריגר", icon: Zap },
   { id: 3, title: "עיצוב ההודעה", icon: Mail },
   { id: 4, title: "סיכום והפעלה", icon: Eye },
-]
-
-const VARIABLE_OPTIONS = [
-  { key: "{{name}}", label: "שם המשתמש" },
-  { key: "{{org_name}}", label: "שם האקדמיה" },
-  { key: "{{course_name}}", label: "שם הקורס (בטריגר קורס/שיעור)" },
-  { key: "{{lesson_name}}", label: "שם השיעור (בטריגר שיעור)" },
-  { key: "{{login_url}}", label: "קישור לכניסה לאקדמיה" },
 ]
 
 export function CreateReminderSheet({ courses, trigger }: CreateReminderSheetProps) {
@@ -361,21 +354,7 @@ export function CreateReminderSheet({ courses, trigger }: CreateReminderSheetPro
                   <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                     <div className="space-y-4">
                       <h3 className="text-lg font-black text-slate-900">מה נכתוב במייל?</h3>
-                      <p className="text-slate-500 text-sm">עצב את המייל שהתלמיד יקבל. תוכל להשתמש במשתנים דינמיים.</p>
-                    </div>
-
-                    <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10">
-                      <p className="text-[11px] font-black text-primary mb-3 flex items-center gap-2 uppercase tracking-wider">
-                        <Zap className="w-3.5 h-3.5" />
-                        קיצורי דרך (יוחלפו אוטומטית):
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {VARIABLE_OPTIONS.map((v) => (
-                          <div key={v.key} className="flex items-center gap-1.5 text-[10px] bg-white px-2 py-1 rounded-full border border-primary/20 text-slate-600 shadow-sm" title={v.label}>
-                            <code className="text-primary font-bold">{v.key}</code>
-                          </div>
-                        ))}
-                      </div>
+                      <p className="text-slate-500 text-sm">עצב את המייל שהתלמיד יקבל. הקלד <span className="font-bold text-primary">@</span> כדי להוסיף משתנים דינמיים.</p>
                     </div>
                     
                     <FormField
@@ -385,7 +364,12 @@ export function CreateReminderSheet({ courses, trigger }: CreateReminderSheetPro
                         <FormItem className="text-right">
                           <FormLabel className="font-bold text-slate-700">נושא המייל</FormLabel>
                           <FormControl>
-                            <Input placeholder="לדוגמה: היי {{name}}, מחכה לך שיעור חדש!" {...field} className="rounded-2xl h-12 bg-slate-50 border-slate-200 focus:bg-white transition-all font-medium" />
+                            <VariableInput 
+                              placeholder="לדוגמה: היי {{name}}, מחכה לך שיעור חדש!" 
+                              value={field.value}
+                              onChangeValue={field.onChange}
+                              className="rounded-2xl h-12 bg-slate-50 border-slate-200 focus:bg-white transition-all font-medium" 
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

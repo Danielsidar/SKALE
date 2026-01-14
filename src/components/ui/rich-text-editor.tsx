@@ -1,6 +1,6 @@
 'use client'
 
-import { useEditor, EditorContent } from '@tiptap/react'
+import { useEditor, EditorContent, ReactRenderer } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import Link from '@tiptap/extension-link'
@@ -9,6 +9,9 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
 import Placeholder from '@tiptap/extension-placeholder'
+import Mention from '@tiptap/extension-mention'
+import tippy from 'tippy.js'
+import { MentionList } from './mention-list'
 import { 
   Bold, 
   Italic, 
@@ -258,6 +261,80 @@ const Toolbar = ({ editor }: { editor: any }) => {
   )
 }
 
+const suggestion = {
+  items: ({ query }: { query: string }) => {
+    return [
+      { id: '{{name}}', label: 'שם המשתמש' },
+      { id: '{{org_name}}', label: 'שם האקדמיה' },
+      { id: '{{course_name}}', label: 'שם הקורס' },
+      { id: '{{lesson_name}}', label: 'שם השיעור' },
+      { id: '{{login_url}}', label: 'קישור התחברות' },
+    ].filter(item => 
+      item.label.toLowerCase().includes(query.toLowerCase()) || 
+      item.id.toLowerCase().includes(query.toLowerCase())
+    )
+  },
+
+  render: () => {
+    let component: any
+    let popup: any
+
+    return {
+      onStart: (props: any) => {
+        component = new ReactRenderer(MentionList, {
+          props,
+          editor: props.editor,
+        })
+
+        if (!props.clientRect) {
+          return
+        }
+
+        popup = tippy('body', {
+          getReferenceClientRect: props.clientRect,
+          appendTo: () => document.body,
+          content: component.element,
+          showOnCreate: true,
+          interactive: true,
+          trigger: 'manual',
+          placement: 'bottom-start',
+        })
+      },
+
+      onUpdate(props: any) {
+        component.updateProps(props)
+
+        if (!props.clientRect) {
+          return
+        }
+
+        popup[0].setProps({
+          getReferenceClientRect: props.clientRect,
+        })
+      },
+
+      onKeyDown(props: any) {
+        if (props.event.key === 'Escape') {
+          popup[0].hide()
+
+          return true
+        }
+
+        return component.ref?.onKeyDown(props)
+      },
+
+      onExit() {
+        if (popup && popup[0]) {
+          popup[0].destroy()
+        }
+        if (component) {
+          component.destroy()
+        }
+      },
+    }
+  },
+}
+
 export function RichTextEditor({ content, onChange, placeholder }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
@@ -290,6 +367,22 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
       Highlight.configure({ multicolor: true }),
       Placeholder.configure({
         placeholder: placeholder || 'הקלד תוכן כאן...',
+      }),
+      Mention.configure({
+        HTMLAttributes: {
+          class: 'mention text-primary font-bold bg-primary/10 px-1 rounded',
+        },
+        suggestion,
+        renderText({ node }) {
+          return `${node.attrs.id}`
+        },
+        renderHTML({ node }) {
+          return [
+            'span',
+            { 'data-type': 'mention', 'data-id': node.attrs.id, class: 'mention text-primary font-bold' },
+            `${node.attrs.id}`
+          ]
+        },
       }),
     ],
     content: content,
