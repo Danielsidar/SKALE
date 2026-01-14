@@ -1,0 +1,52 @@
+You are an expert full-stack developer specializing in Next.js 14, TypeScript, Tailwind CSS, and Supabase.
+
+### Project Context
+- **Framework**: Next.js 14 (App Router).
+- **Language**: Hebrew (RTL) - The UI is primarily in Hebrew. Use `dir="rtl"` and Hebrew text for user-facing strings.
+- **Database/Auth**: Supabase with SSR (@supabase/ssr).
+- **Styling**: Tailwind CSS, shadcn/ui.
+- **Icons**: Lucide React.
+- **Design System**: 
+  - **Modern & Playful**: Large border radii (e.g., `rounded-[2rem]`, `rounded-[2.5rem]`, `rounded-3xl`).
+  - **Typography**: Extensive use of `font-black` for titles and `font-bold` for emphasis. Hebrew font: `Assistant`.
+  - **Colors**: Slate palette (`bg-slate-50`, `text-slate-500`, etc.) and primary brand colors.
+  - **Shadows**: Soft, subtle shadows (`shadow-sm`, `shadow-xl shadow-primary/20`).
+
+### General Guidelines
+- Use TypeScript for all files. Define interfaces/types for props and data structures.
+- Use functional components and hooks. Prefer arrow functions for components.
+- Follow the existing project structure:
+  - `src/app`: Page components and layouts.
+  - `src/components`: Reusable UI components.
+  - `src/lib`: Shared utilities and Supabase clients.
+  - `src/actions`: Server Actions for mutations.
+- Keep components small and focused. Extract logic into hooks or utility functions where appropriate.
+
+### Next.js & React Patterns
+- **Server Components**: Use by default for data fetching and layout.
+- **Client Components**: Use `'use client'` ONLY for interactivity (hooks, event listeners, state).
+- **Server Actions**: Use `'use server'` for ALL mutations (Create, Update, Delete). 
+  - Always include `revalidatePath` after successful mutations to refresh the cache.
+  - Handle errors with `try/catch` and throw descriptive errors.
+- **UI First / Optimistic Updates**: ALWAYS prioritize updating the UI immediately (Optimistic UI). Update local state first to show changes instantly to the user, and perform DB operations in the background. Revert local state only if the server action fails. Never make the user wait for a DB response for basic UI interactions (renaming, reordering, etc.).
+- **Navigation**: Use `next/link` for internal navigation.
+
+### Supabase & Data Fetching
+- **Server-side**: Use `import { createClient } from '@/lib/supabase/server'`.
+- **Client-side**: Use `import { createClient } from '@/lib/supabase/client'`.
+- Use the Supabase query builder for database operations.
+- Prefer `revalidatePath` over client-side state management for keeping UI in sync with the database.
+
+### Styling & UI (RTL Support)
+- **Tailwind CSS**: Use utility classes. Use the `cn` utility for conditional classes.
+- **RTL Considerations**: 
+  - Use logical properties where possible: `ps-*` (padding-start), `pe-*` (padding-end), `ms-*` (margin-start), `me-*` (margin-end).
+  - Use `text-right` or `text-start` appropriately.
+- **shadcn/ui**: Follow the established pattern for custom UI components.
+- **Feedback**: Use **Sonner** (`toast`) for user notifications (success/error).
+
+### Best Practices
+- **Naming**: kebab-case for file names (e.g., `course-builder.tsx`, `create-course-sheet.tsx`).
+- **Imports**: Use absolute paths (`@/components/...`). Group imports: React/Next -> Libraries -> Local.
+- **Clean Code**: Remove unused imports. Add meaningful comments for complex business logic.
+- **Hebrew**: All UI text must be in professional Hebrew. Double-check for correct RTL alignment.
