@@ -66,7 +66,7 @@ export default async function StudentDashboardPage({ params }: { params: { orgSl
       .eq('status', 'published')
     
     myCourses = (allCourses || []).map(c => {
-      const sortedModules = (c.modules || []).sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+      const sortedModules = (c.modules || []).sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0))
       const allLessons = sortedModules.flatMap(m => m.lessons || [])
       const totalLessons = allLessons.length
       const completedCount = allLessons.filter(l => completedLessonIds.has(l.id)).length
@@ -95,7 +95,7 @@ export default async function StudentDashboardPage({ params }: { params: { orgSl
 
     myCourses = (enrollments || []).map(e => {
       const c = e.courses
-      const sortedModules = (c.modules || []).sort((a, b) => (a.order_index || 0) - (b.order_index || 0))
+      const sortedModules = (c.modules || []).sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0))
       const allLessons = sortedModules.flatMap(m => m.lessons || [])
       const totalLessons = allLessons.length
       const completedCount = allLessons.filter(l => completedLessonIds.has(l.id)).length
