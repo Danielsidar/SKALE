@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -52,6 +53,7 @@ export function LessonQuestions({
   currentUserName,
   isAdmin
 }: LessonQuestionsProps) {
+  const router = useRouter()
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
   const [answeringId, setAnsweringId] = useState<string | null>(null)

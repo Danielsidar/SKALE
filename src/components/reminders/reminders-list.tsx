@@ -41,6 +41,7 @@ export function RemindersList({ reminders, courses }: RemindersListProps) {
       case 'lesson_completed': return <BookOpen className="w-5 h-5" />
       case 'course_completed': return <GraduationCap className="w-5 h-5" />
       case 'new_user': return <UserPlus className="w-5 h-5" />
+      case 'course_enrolled': return <BookOpen className="w-5 h-5" />
       default: return <Bell className="w-5 h-5" />
     }
   }
@@ -50,6 +51,9 @@ export function RemindersList({ reminders, courses }: RemindersListProps) {
     switch (reminder.trigger_type) {
       case 'new_user':
         return 'הצטרפות משתמש חדש'
+      case 'course_enrolled':
+        const courseEnrolled = courses.find(c => c.id === config.course_id)
+        return `פתיחת קורס: ${courseEnrolled?.title || 'קורס לא ידוע'}`
       case 'inactive_days': 
         return `חוסר פעילות של ${config.days} ימים`
       case 'lesson_completed':

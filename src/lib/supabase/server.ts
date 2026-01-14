@@ -1,7 +1,9 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-export function createClient(cookieStore?: any) {
+type CookieToSet = { name: string; value: string; options: CookieOptions }
+
+export function createClient(cookieStore?: ReturnType<typeof cookies>) {
   // If cookieStore is not provided, try to get it from next/headers
   // This makes the function more flexible and robust
   const effectiveStore = cookieStore || cookies()
@@ -18,9 +20,9 @@ export function createClient(cookieStore?: any) {
             return []
           }
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: CookieToSet[]) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
+            cookiesToSet.forEach(({ name, value, options }: CookieToSet) =>
               effectiveStore.set(name, value, options)
             )
           } catch {

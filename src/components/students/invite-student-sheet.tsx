@@ -40,7 +40,7 @@ const formSchema = z.object({
     message: "אימייל לא תקין",
   }),
   role: z.enum(["student", "support"], {
-    required_error: "נא לבחור תפקיד",
+    message: "נא לבחור תפקיד",
   }),
 })
 

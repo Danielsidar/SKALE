@@ -180,7 +180,7 @@ export function AcademyHeader({
       </div>
 
       <div className="flex items-center gap-3">
-        <Popover dir="rtl">
+        <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-lg h-9 w-9 text-slate-500 hover:bg-slate-50 hover:text-primary transition-all relative">
               <Bell className="w-4.5 h-4.5" />
@@ -325,7 +325,7 @@ export function AcademyHeader({
         
         <div className="w-px h-6 bg-slate-100 mx-1" />
         
-        <DropdownMenu dir="rtl">
+        <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-3 p-1 rounded-lg hover:bg-slate-50 transition-all h-auto group">
               <Avatar className="w-8 h-8 rounded shadow-sm border border-slate-100 transition-transform group-hover:scale-105">

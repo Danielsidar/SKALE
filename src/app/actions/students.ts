@@ -287,6 +287,21 @@ export async function enrollStudentInCourse(studentId: string, courseId: string)
     throw new Error(error.message)
   }
 
+  // Trigger course enrollment reminder
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('organization_id')
+      .eq('id', studentId)
+      .single()
+    
+    if (profile?.organization_id) {
+      await processTrigger('course_enrolled', studentId, profile.organization_id, { courseId })
+    }
+  } catch (e) {
+    console.error('Error triggering course_enrolled reminder:', e)
+  }
+
   revalidatePath('/students')
   revalidatePath(`/students/${studentId}`)
 }

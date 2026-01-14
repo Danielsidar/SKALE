@@ -1,7 +1,7 @@
 import { createAdminClient } from './supabase/admin'
 import { sendEmail } from './resend'
 
-type TriggerType = 'inactive_days' | 'lesson_completed' | 'course_completed' | 'new_user'
+type TriggerType = 'inactive_days' | 'lesson_completed' | 'course_completed' | 'new_user' | 'course_enrolled'
 
 export async function processTrigger(
   type: TriggerType, 
@@ -48,6 +48,19 @@ export async function processTrigger(
     // 3. Check if specific condition matches and fetch extra data for variables
     if (type === 'new_user') {
       shouldSend = true
+    } else if (type === 'course_enrolled') {
+      if (config.course_id === context.courseId) {
+        shouldSend = true
+        const { data: course } = await supabase
+          .from('courses')
+          .select('title')
+          .eq('id', context.courseId)
+          .single()
+        
+        if (course) {
+          dynamicData.course_name = course.title
+        }
+      }
     } else if (type === 'lesson_completed') {
       if (config.lesson_id === context.lessonId) {
         shouldSend = true
@@ -65,7 +78,6 @@ export async function processTrigger(
       }
     } else if (type === 'course_completed') {
       if (config.course_id === context.courseId) {
-        // Simple logic: check if the trigger is for this specific course
         shouldSend = true
         
         const { data: course } = await supabase
@@ -89,7 +101,6 @@ export async function processTrigger(
         }
       }
     } else if (type === 'inactive_days') {
-      // Handled by Edge Function usually, but if called here:
       shouldSend = true
     }
 

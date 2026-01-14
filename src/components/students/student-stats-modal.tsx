@@ -637,7 +637,7 @@ export function StudentStatsModal({ student, isOpen, onClose }: StudentStatsModa
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: idx * 0.1 }}
-                          whileHover={{ y: -5, shadow: "0 10px 25px -5px rgba(0,0,0,0.1)" }}
+                          whileHover={{ y: -5, boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)" }}
                           className="bg-white rounded-[1.5rem] p-6 border border-slate-100 shadow-sm transition-all text-right"
                         >
                           <div className="flex items-center gap-3 mb-4">
