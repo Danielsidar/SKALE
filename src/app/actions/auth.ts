@@ -175,7 +175,7 @@ export async function checkEmailStatus(email: string, orgSlug?: string) {
       .eq('organizations.slug', orgSlug)
       .maybeSingle()
     
-    if (!profile) return { exists: false }
+    if (!profile) return { exists: false, needsPasswordSetup: false }
     
     // Check password status
     const { data: { users }, error: listError } = await admin.auth.admin.listUsers()
@@ -192,7 +192,7 @@ export async function checkEmailStatus(email: string, orgSlug?: string) {
       .eq('email', email)
       .maybeSingle()
 
-    if (!profile) return { exists: false }
+    if (!profile) return { exists: false, needsPasswordSetup: false }
 
     // Check password status
     const { data: { users }, error: listError } = await admin.auth.admin.listUsers()
