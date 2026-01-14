@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
+import { processTrigger } from '@/lib/trigger-handler'
 
 export async function checkUserExists(email: string) {
   const admin = createAdminClient()
@@ -98,6 +99,13 @@ export async function inviteStudent(email: string, role: 'student' | 'support' =
       }
       throw new Error(profileError.message)
     }
+
+    // Trigger New User Reminder
+    try {
+      await processTrigger('new_user', existingAuthUser.id, organizationId)
+    } catch (e) {
+      console.error('Error triggering new_user reminder:', e)
+    }
     
     revalidatePath('/students')
     return { success: true, message: 'הסטודנט התווסף למכללה בהצלחה' }
@@ -133,6 +141,13 @@ export async function inviteStudent(email: string, role: 'student' | 'support' =
 
   if (profileError) throw new Error(profileError.message)
   
+  // Trigger New User Reminder
+  try {
+    await processTrigger('new_user', authUser.user.id, organizationId)
+  } catch (e) {
+    console.error('Error triggering new_user reminder:', e)
+  }
+
   revalidatePath('/students')
   return { success: true }
 }

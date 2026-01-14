@@ -7,6 +7,7 @@ import { cookies } from 'next/headers'
 
 export type NotificationType = 
   | 'new_course' 
+  | 'new_lesson'
   | 'lesson_update' 
   | 'new_file' 
   | 'message' 

@@ -1,7 +1,7 @@
 import { createAdminClient } from './supabase/admin'
 import { sendEmail } from './resend'
 
-type TriggerType = 'inactive_days' | 'lesson_completed' | 'course_completed'
+type TriggerType = 'inactive_days' | 'lesson_completed' | 'course_completed' | 'new_user'
 
 export async function processTrigger(
   type: TriggerType, 
@@ -21,61 +21,80 @@ export async function processTrigger(
 
   if (error || !reminders || reminders.length === 0) return
 
-  // 2. Fetch user profile
+  // 2. Fetch user profile and organization info
   const { data: profile } = await supabase
     .from('profiles')
-    .select('email, name')
+    .select('email, name, organizations(name, slug)')
     .eq('id', profileId)
     .eq('organization_id', organizationId)
     .single()
 
   if (!profile || !profile.email) return
 
+  const org = (profile.organizations as any)
+  const orgName = org?.name || ''
+  const orgSlug = org?.slug || ''
+  const loginUrl = orgSlug ? `${process.env.NEXT_PUBLIC_APP_URL || 'https://academy.com'}/academy/${orgSlug}` : ''
+
   for (const reminder of reminders) {
     const config = reminder.trigger_config as any
-
-    // 3. Check if specific condition matches
     let shouldSend = false
+    let dynamicData: any = {
+      name: profile.name || 'תלמיד/ה',
+      org_name: orgName,
+      login_url: loginUrl
+    }
 
-    if (type === 'lesson_completed') {
+    // 3. Check if specific condition matches and fetch extra data for variables
+    if (type === 'new_user') {
+      shouldSend = true
+    } else if (type === 'lesson_completed') {
       if (config.lesson_id === context.lessonId) {
         shouldSend = true
+        // Fetch lesson and course name for variables
+        const { data: lesson } = await supabase
+          .from('lessons')
+          .select('title, modules(courses(title))')
+          .eq('id', context.lessonId)
+          .single()
+        
+        if (lesson) {
+          dynamicData.lesson_name = lesson.title
+          dynamicData.course_name = (lesson.modules as any)?.courses?.title
+        }
       }
     } else if (type === 'course_completed') {
       if (config.course_id === context.courseId) {
-        // Check if all lessons in the course are completed
-        const { data: totalLessons } = await supabase
-          .from('lessons')
-          .select('id', { count: 'exact', head: true })
-          .filter('module_id', 'in', 
-            supabase.from('modules').select('id').eq('course_id', context.courseId)
-          )
+        // Simple logic: check if the trigger is for this specific course
+        shouldSend = true
         
-        // This query above is complex for Supabase JS. Let's do it simpler.
+        const { data: course } = await supabase
+          .from('courses')
+          .select('title')
+          .eq('id', context.courseId)
+          .single()
+        
+        if (course) {
+          dynamicData.course_name = course.title
+        }
+
+        // Verify it's actually completed (all lessons)
         const { data: modules } = await supabase.from('modules').select('id').eq('course_id', context.courseId)
         const moduleIds = modules?.map(m => m.id) || []
-        
-        const { count: lessonsCount } = await supabase
-          .from('lessons')
-          .select('*', { count: 'exact', head: true })
-          .in('module_id', moduleIds)
+        const { count: lessonsCount } = await supabase.from('lessons').select('*', { count: 'exact', head: true }).in('module_id', moduleIds)
+        const { count: completionsCount } = await supabase.from('lesson_completions').select('*', { count: 'exact', head: true }).eq('profile_id', profileId).in('lesson_id', (await supabase.from('lessons').select('id').in('module_id', moduleIds)).data?.map(l => l.id) || [])
 
-        const { count: completionsCount } = await supabase
-          .from('lesson_completions')
-          .select('*', { count: 'exact', head: true })
-          .eq('profile_id', profileId)
-          .in('lesson_id', 
-            (await supabase.from('lessons').select('id').in('module_id', moduleIds)).data?.map(l => l.id) || []
-          )
-
-        if (lessonsCount && completionsCount && lessonsCount === completionsCount) {
-          shouldSend = true
+        if (!lessonsCount || !completionsCount || lessonsCount !== completionsCount) {
+          shouldSend = false
         }
       }
+    } else if (type === 'inactive_days') {
+      // Handled by Edge Function usually, but if called here:
+      shouldSend = true
     }
 
     if (shouldSend) {
-      // 4. Check if already sent to avoid duplicates (especially for action-based)
+      // 4. Check if already sent (for action-based triggers)
       const { data: alreadySent } = await supabase
         .from('sent_reminders')
         .select('id')
@@ -85,12 +104,19 @@ export async function processTrigger(
 
       if (alreadySent && alreadySent.length > 0) continue
 
-      // 5. Send Email
-      const emailHtml = reminder.email_content.replace('{{name}}', profile.name || 'תלמיד/ה')
+      // 5. Replace dynamic variables in content and subject
+      let emailHtml = reminder.email_content
+      let emailSubject = reminder.email_subject
+
+      Object.keys(dynamicData).forEach(key => {
+        const regex = new RegExp(`{{${key}}}`, 'g')
+        emailHtml = emailHtml.replace(regex, dynamicData[key] || '')
+        emailSubject = emailSubject.replace(regex, dynamicData[key] || '')
+      })
       
-      const { data: sentData, error: sendError } = await sendEmail({
+      const { error: sendError } = await sendEmail({
         to: profile.email,
-        subject: reminder.email_subject,
+        subject: emailSubject,
         html: emailHtml
       })
 
@@ -106,9 +132,6 @@ export async function processTrigger(
   }
 }
 
-// Function to check for inactive users - DEPRECATED: Now handled by Supabase Edge Function 'check-inactive-reminders'
 export async function checkInactiveUsers() {
   console.warn('checkInactiveUsers is deprecated. Use Supabase Edge Function instead.');
 }
-
-

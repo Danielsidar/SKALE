@@ -12,7 +12,8 @@ import {
   Calendar,
   ToggleLeft,
   ToggleRight,
-  ChevronLeft
+  ChevronLeft,
+  UserPlus
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -39,6 +40,7 @@ export function RemindersList({ reminders, courses }: RemindersListProps) {
       case 'inactive_days': return <Clock className="w-5 h-5" />
       case 'lesson_completed': return <BookOpen className="w-5 h-5" />
       case 'course_completed': return <GraduationCap className="w-5 h-5" />
+      case 'new_user': return <UserPlus className="w-5 h-5" />
       default: return <Bell className="w-5 h-5" />
     }
   }
@@ -46,6 +48,8 @@ export function RemindersList({ reminders, courses }: RemindersListProps) {
   const getTriggerText = (reminder: any) => {
     const config = reminder.trigger_config
     switch (reminder.trigger_type) {
+      case 'new_user':
+        return 'הצטרפות משתמש חדש'
       case 'inactive_days': 
         return `חוסר פעילות של ${config.days} ימים`
       case 'lesson_completed':
@@ -150,4 +154,3 @@ export function RemindersList({ reminders, courses }: RemindersListProps) {
     </div>
   )
 }
-
